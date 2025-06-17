@@ -1,22 +1,58 @@
 ## load packages
-pacman::p_load(dplyr, tidyr, writexl, readxl)
-
-
-## clean survey data by years and standardise variables
-
-## 2008
+pacman::p_load(dplyr, tidyr, stringr, tibble, writexl, readxl)
 
 ## set wd
 setwd("C:/Users/vl22683/OneDrive - University of Bristol/Documents/PhD Papers/Paper 3a - Ukraine Sex Work HIV/data/SW data")
 
-## load data
+# load data dictionary
+data_dictionary <- read_excel("Data dictionary.xlsx")
+
+# load 2008 data
 sw_data_2008_raw <- read_excel("2008_IBBS_FSW_TLS AND RDS_Data.xlsx")
-View(sw_data_2008_raw)
 
-## save data
-write_xlsx(sw_data_2008_clean, "sw_data_2008_clean.xlsx")
+# variables to keep
+vars_to_keep <- data_dictionary$`2008`
+vars_to_keep <- vars_to_keep[!is.na(vars_to_keep) & vars_to_keep != "no"]
+vars_to_keep <- vars_to_keep[vars_to_keep %in% names(sw_data_2008_raw)]
 
-## append survey data
+# Subset the raw data to those columns
+sw_data_2008_clean <- sw_data_2008_raw %>%
+  select(all_of(vars_to_keep))
+
+# Make sure the relevant columns are character
+data_dictionary$`2008` <- as.character(data_dictionary$`2008`)
+data_dictionary$Variable <- as.character(data_dictionary$Variable)
+
+# Create the rename vector: names = current names, values = new names
+rename_vector <- setNames(data_dictionary$Variable, data_dictionary$`2008`)
+
+# Rename columns 
+names(sw_data_2008_clean) <- ifelse(
+  names(sw_data_2008_clean) %in% names(rename_vector),
+  rename_vector[names(sw_data_2008_clean)],
+  names(sw_data_2008_clean)  # leave unchanged if no match
+)
+
+View(sw_data_2008_clean)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## append data
 
 ## prepare longitudinal data 
 
